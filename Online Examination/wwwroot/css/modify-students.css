@@ -1,0 +1,48 @@
+body {
+    background: #acacac;
+    color: white;
+    font-family: Arial;
+    margin: 0;
+}
+
+.navbar {
+    background: #000000;
+    padding: 15px;
+    text-align: center;
+}
+
+.admin-table {
+    padding: 40px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+}
+
+button {
+    padding: 8px 12px;
+    border: none;
+    background: orange;
+    color: black;
+    border-radius: 4px;
+}
+
+.delete {
+    background: red;
+    color: white;
+}
+
+/* FOOTER */
+footer {
+    background-color: #000;
+    color: white;
+    text-align: center;
+    padding: 40px;
+    margin-top: 540px;
+}

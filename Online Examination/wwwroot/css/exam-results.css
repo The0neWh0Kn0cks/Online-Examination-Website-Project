@@ -1,0 +1,41 @@
+body {
+    background: #7a7a7a;
+    color: white;
+    font-family: Arial;
+    margin: 0;
+}
+
+.navbar {
+    padding: 15px;
+    background: #000000;
+    text-align: center;
+}
+
+.results {
+    text-align: center;
+    margin-top: 80px;
+}
+
+.score {
+    font-size: 60px;
+    color: lime;
+}
+
+.btn {
+    display: inline-block;
+    margin-top: 30px;
+    background: red;
+    padding: 12px 25px;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+/* FOOTER */
+footer {
+    background-color: #000;
+    color: white;
+    text-align: center;
+    padding: 40px;
+    margin-top: 360px;
+}

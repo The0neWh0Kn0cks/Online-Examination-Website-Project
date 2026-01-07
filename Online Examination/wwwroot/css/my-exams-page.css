@@ -1,0 +1,76 @@
+body {
+    background: #d1d1d1;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.navbar {
+    background: #000000;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.navbar nav a {
+    color: white;
+    margin-left: 20px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navbar nav a:hover {
+    text-decoration: underline;
+}
+
+.exam-list {
+    max-width: 900px;
+    margin: 50px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.exam-card {
+    background: #1f1f1f;
+    padding: 25px;
+    border-radius: 10px;
+}
+
+.pending {
+    color: orange;
+}
+
+.completed {
+    color: lime;
+}
+
+.enter-btn,
+.result-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 25px;
+    background: crimson;
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: bold;
+}
+
+.enter-btn:hover,
+.result-btn:hover {
+    background: darkred;
+}
+
+/* FOOTER */
+footer {
+    background-color: #000;
+    color: white;
+    text-align: center;
+    padding: 30px;
+    margin-top: 330px;
+}

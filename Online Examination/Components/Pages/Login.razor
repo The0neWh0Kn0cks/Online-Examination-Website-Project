@@ -1,0 +1,48 @@
+﻿@page "/login"
+@layout EmptyLayout
+@* 👆 注意：如果没有 EmptyLayout，这行先删掉，但这会导致页面出现左侧菜单栏。后面我会教你解决布局问题。 *@
+
+<HeadContent>
+    <link rel="stylesheet" href="css/loginstyle.css">
+    <title>Login | Examination Board</title>
+</HeadContent>
+
+<header class="navbar">
+    <div class="logo">Examination Board</div>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About Us</a>
+    </nav>
+</header>
+
+<div class="login-page">
+    <div class="login-box">
+        <h1>Login</h1>
+
+        <form>
+            <label>Email</label>
+            <input type="email" placeholder="Enter your email" required>
+
+            <label>Password</label>
+            <input type="password" placeholder="Enter your password" required>
+
+            <div class="forgot">
+                <a href="/forgot-password">Forgot password?</a>
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p class="note">
+            Don't have an account? <a href="#">Contact your school / organization</a>
+        </p>
+    </div>
+</div>
+
+<footer>
+    © Examination Board
+</footer>
+
+@code {
+    // 这里留着以后写 C# 登录逻辑
+}

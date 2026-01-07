@@ -1,6 +1,17 @@
+using Microsoft.EntityFrameworkCore;
 using Online_Examination.Components;
+using OnlineExamination.Data;
+using OnlineExamination.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddDbContext<OnlineExaminationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<StudentService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

@@ -1,0 +1,163 @@
+/* GENERAL */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #000;
+}
+
+/* NAVBAR */
+.navbar {
+    background-color: #000;
+    color: white;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.navbar nav a {
+    color: white;
+    margin-left: 25px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navbar nav a:hover {
+    text-decoration: underline;
+}
+
+/* LEVEL SECTION */
+.level-section {
+    min-height: 100vh;
+    padding: 6px 40px;
+    text-align: center;
+    color: white;
+    background: url("/pics/dungeon\ pic.jpg") center/cover no-repeat;
+    transition: background 0.5s ease;
+}
+
+.level-section h1 {
+    font-size: 36px;
+    margin-bottom: 50px;
+}
+
+/* CONTAINER */
+.level-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* CARDS */
+.level-card {
+    width: 260px;
+    height: 360px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.level-card:hover {
+    transform: scale(1.1);
+    background: rgba(0,0,0,0.7);
+}
+
+/* TEXT */
+.level-card h2 {
+    margin-top: 220px;
+    font-size: 18px;
+}
+
+.rank {
+    color: #f4d03f;
+    font-weight: bold;
+}
+
+/* CHARACTER */
+.character {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    width: 150px;
+    height: 150px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: all 0.4s ease;
+}
+
+.level-card:hover .character {
+    transform: translateX(-50%) scale(1) rotate(360deg);
+    opacity: 1;
+}
+
+/* CHARACTER IMAGES (REPLACE WITH YOUR OWN) */
+.Noob {
+    background-image: url("/pics/poop.jpeg");
+}
+
+.Pro {
+    background-image: url("/pics/cr7.jpg");
+}
+
+.Hacker {
+    background-image: url("/pics/angel.jpg");
+}
+
+
+/* BACKGROUND CHANGE ON HOVER */
+.level-section:has(.primary:hover) {
+    background-image: url("/pics/peasant.jpg");
+}
+
+.level-section:has(.secondary:hover) {
+    background-image: url("/pics/pro.jpg");
+}
+
+.level-section:has(.poly:hover) {
+    background-image: url("/pics/ltg.jpeg");
+}
+/* BUY BUTTON */
+.buy-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 25px;
+    background: crimson;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 25px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+/* SHOW BUTTON ON HOVER */
+.level-card:hover .buy-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* BUTTON HOVER */
+.buy-btn:hover {
+    background: darkred;
+}
+
+/* FOOTER */
+footer {
+    background-color: #000;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}

@@ -1,0 +1,87 @@
+body {
+    margin: 0;
+    background: #cccccc;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+/* NAVBAR */
+.navbar {
+    background: #000000;
+    padding: 15px;
+    text-align: center;
+}
+
+/* MAIN SECTION */
+.exam-index {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* FILTER */
+.filter-box {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.filter-box input,
+.filter-box select {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+}
+
+/* EXAM LIST */
+.exam-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* EXAM CARD */
+.exam-card {
+    background: #1f1f1f;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.exam-card h3 {
+    margin: 0;
+}
+
+.exam-card p {
+    margin: 8px 0 15px;
+    color: #aaa;
+}
+
+/* ACTION BUTTONS */
+.actions {
+    display: flex;
+    gap: 15px;
+}
+
+.actions a {
+    padding: 10px 20px;
+    background: #444;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.actions a:hover {
+    background: #e63946;
+}
+
+/* FOOTER */
+footer {
+    background-color: #000;
+    color: white;
+    text-align: center;
+    padding: 40px;
+    margin-top: 290px;
+}
+

@@ -1,0 +1,100 @@
+body {
+    background: #616161;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+.navbar {
+    background: #000000;
+    padding: 15px;
+    text-align: center;
+}
+
+.student-container {
+    display: flex;
+    gap: 40px;
+    padding: 40px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* LEFT SIDE – STUDENT INFO */
+.student-info {
+    flex: 1;
+    background: #1f1f1f;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+.student-info label {
+    display: block;
+    margin-top: 15px;
+}
+
+.student-info input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: none;
+}
+
+/* BUTTONS */
+.save {
+    margin-top: 20px;
+    padding: 12px;
+    width: 100%;
+    background: limegreen;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.reset {
+    margin-top: 10px;
+    padding: 12px;
+    width: 100%;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+/* RIGHT SIDE – EXAMS */
+.exam-status {
+    flex: 1;
+    background: #1f1f1f;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #333;
+}
+
+.done {
+    color: lime;
+    font-weight: bold;
+}
+
+.pending {
+    color: orange;
+    font-weight: bold;
+}
+
+/* FOOTER */
+footer {
+    background-color: #000;
+    color: white;
+    text-align: center;
+    padding: 40px;
+    margin-top: 195px;
+}
