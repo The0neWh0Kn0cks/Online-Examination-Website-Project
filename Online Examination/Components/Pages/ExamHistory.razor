@@ -1,0 +1,133 @@
+@page "/exam-history"
+@inject StudentService StudentService
+@inject UserSession UserSession
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Exam History</PageTitle>
+
+<div class="container mt-4">
+    <h2 class="mb-4">My Exam History</h2>
+
+    @if (!UserSession.IsLoggedIn)
+    {
+        <div class="alert alert-warning">
+            Please <a href="/login">login</a> to view your exam history.
+        </div>
+    }
+    else if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading history...</span>
+            </div>
+            <p>Loading your exam history...</p>
+        </div>
+    }
+    else if (attempts == null || !attempts.Any())
+    {
+        <div class="alert alert-info">
+            <h5>No exam history found</h5>
+            <p class="mb-0">You haven't taken any exams yet. <a href="/exams">Start an exam now!</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Exam Title</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Date Taken</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var attempt in attempts)
+                    {
+                        <tr>
+                            <td>@attempt.Exam?.Title</td>
+                            <td>
+                                <strong>@attempt.Score</strong> / @attempt.Exam?.Questions.Count
+                            </td>
+                            <td>
+                                @{
+                                    var percentage = CalculatePercentage(attempt);
+                                    var badgeClass = GetBadgeClass(percentage);
+                                }
+                                <span class="badge @badgeClass">@percentage%</span>
+                            </td>
+                            <td>@attempt.DateCreated.ToString("MMM dd, yyyy hh:mm tt")</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewResult(attempt.Id)">
+                                    <i class="bi bi-eye"></i> View Result
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4">
+            <button class="btn btn-secondary" @onclick="GoToExams">
+                <i class="bi bi-arrow-left"></i> Back to Exams
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Attempt> attempts = new List<Attempt>();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!UserSession.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            attempts = await StudentService.GetStudentHistoryAsync(UserSession.CurrentUserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading history: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private double CalculatePercentage(Attempt attempt)
+    {
+        if (attempt.Exam?.Questions.Count > 0)
+        {
+            return Math.Round((double)attempt.Score / attempt.Exam.Questions.Count * 100, 2);
+        }
+        return 0;
+    }
+
+    private string GetBadgeClass(double percentage)
+    {
+        if (percentage >= 75) return "bg-success";
+        if (percentage >= 50) return "bg-info";
+        return "bg-warning";
+    }
+
+    private void ViewResult(int attemptId)
+    {
+        Navigation.NavigateTo($"/result/{attemptId}");
+    }
+
+    private void GoToExams()
+    {
+        Navigation.NavigateTo("/exams");
+    }
+}

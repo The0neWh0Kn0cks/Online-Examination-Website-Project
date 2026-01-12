@@ -1,14 +1,167 @@
-﻿@page "/exam-results"
+﻿@page "/result/{AttemptId:int}"
+@inject StudentService StudentService
+@inject UserSession UserSession
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
 
 <HeadContent>
     <link rel="stylesheet" href="/css/exam-results.css">
 </HeadContent>
 
-<section class="exam-results">
-    <h2>Exam Results</h2>
-    <p>Your score and detailed feedback will appear here.</p>
-</section>
+<PageTitle>Exam Result</PageTitle>
+
+<div class="container mt-5">
+    @if (!UserSession.IsLoggedIn)
+    {
+        <div class="alert alert-warning">
+            Please <a href="/login">login</a> to view your results.
+        </div>
+    }
+    else if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading results...</span>
+            </div>
+            <p>Loading your results...</p>
+        </div>
+    }
+    else if (attempt == null)
+    {
+        <div class="alert alert-danger">
+            Result not found.
+        </div>
+    }
+    else
+    {
+        <section class="exam-results text-center">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h2 class="mb-3">Test Completed!</h2>
+                    
+                    @if (attempt.Exam != null)
+                    {
+                        <h4 class="text-muted mb-4">@attempt.Exam.Title</h4>
+                    }
+
+                    <div class="score-display mb-4">
+                        <h1 class="display-1 fw-bold text-primary">@attempt.Score</h1>
+                        @if (attempt.Exam != null)
+                        {
+                            <h3 class="text-muted">out of @attempt.Exam.Questions.Count</h3>
+                            <p class="lead">Percentage: @CalculatePercentage()%</p>
+                        }
+                    </div>
+
+                    <div class="mt-4">
+                        <p class="text-muted">
+                            <i class="bi bi-calendar"></i> Completed on: @attempt.DateCreated.ToString("MMM dd, yyyy hh:mm tt")
+                        </p>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <button class="btn btn-primary btn-lg" @onclick="GoToExams">
+                            <i class="bi bi-arrow-left"></i> Back to Exams
+                        </button>
+                        <button class="btn btn-outline-secondary btn-lg" @onclick="ViewHistory">
+                            <i class="bi bi-clock-history"></i> View History
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @if (GetPerformanceMessage() != null)
+            {
+                <div class="alert @GetPerformanceClass() mt-4">
+                    <h5>@GetPerformanceMessage()</h5>
+                </div>
+            }
+        </section>
+    }
+</div>
 
 @code {
+    // Route parameter: Attempt ID from URL
+    [Parameter]
+    public int AttemptId { get; set; }
 
+    // Attempt object loaded from database
+    private Attempt? attempt;
+    private bool isLoading = true;
+
+    // Called when component is initialized
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if user is logged in
+        if (!UserSession.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            // Fetch attempt with related exam data
+            var history = await StudentService.GetStudentHistoryAsync(UserSession.CurrentUserId);
+            attempt = history.FirstOrDefault(a => a.Id == AttemptId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading result: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Calculate percentage score
+    private double CalculatePercentage()
+    {
+        if (attempt?.Exam?.Questions.Count > 0)
+        {
+            return Math.Round((double)attempt.Score / attempt.Exam.Questions.Count * 100, 2);
+        }
+        return 0;
+    }
+
+    // Get performance message based on score
+    private string? GetPerformanceMessage()
+    {
+        var percentage = CalculatePercentage();
+        
+        if (percentage >= 90) return "Excellent! Outstanding performance! 🌟";
+        if (percentage >= 75) return "Great job! You did very well! 👏";
+        if (percentage >= 60) return "Good work! Keep it up! 💪";
+        if (percentage >= 50) return "You passed! Consider reviewing the material. 📚";
+        return "Don't worry! Review the material and try again. 💡";
+    }
+
+    // Get Bootstrap alert class based on performance
+    private string GetPerformanceClass()
+    {
+        var percentage = CalculatePercentage();
+        
+        if (percentage >= 75) return "alert-success";
+        if (percentage >= 50) return "alert-info";
+        return "alert-warning";
+    }
+
+    // Navigate back to exams list
+    private void GoToExams()
+    {
+        Navigation.NavigateTo("/exams");
+    }
+
+    // Navigate to exam history page
+    private void ViewHistory()
+    {
+        Navigation.NavigateTo("/exam-history");
+    }
 }

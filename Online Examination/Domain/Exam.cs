@@ -4,7 +4,7 @@ namespace Online_Examination.Domain
 {
     public class Exam : BaseDomainModel
     {
-        [Required(ErrorMessage = "试卷标题不能为空")]
+        [Required]
         [MaxLength(100)]
         public string Title { get; set; } = string.Empty;
 

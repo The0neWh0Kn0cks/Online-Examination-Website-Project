@@ -25,6 +25,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // --- 核心配置 B: 注册你的自定义服务 ---
 // AddScoped 表示：每次 HTTP 请求创建一个新的实例 (最适合数据库操作的服务)
 builder.Services.AddScoped<StudentService>();
+builder.Services.AddScoped<UserSession>();
 
 // ====================================================
 // 2. 管道构建区 (Build App)

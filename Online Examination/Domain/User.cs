@@ -4,14 +4,14 @@ namespace Online_Examination.Domain
 {
     public class User : BaseDomainModel
     {
-        [Required(ErrorMessage = "用户名不能为空")]
+        [Required]
         [MaxLength(50)]
         public string Username { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "密码不能为空")]
+        [Required]
         public string Password { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "邮箱不能为空")]
+        [Required]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
 

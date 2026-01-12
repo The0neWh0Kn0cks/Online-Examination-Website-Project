@@ -5,6 +5,14 @@ body {
     color: #333;
 }
 
+/* Exam List Page Styles */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
 /* EXAM LIST SECTION */
 .exam-list {
     max-width: 900px;
@@ -15,32 +23,65 @@ body {
     gap: 25px;
 }
 
-/* EXAM CARD */
-.exam-card {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    text-align: center;
-    transition: transform 0.3s, box-shadow 0.3s;
+.exam-list .row {
+    margin-top: 20px;
 }
 
-    .exam-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-    }
+/* EXAM CARD */
+.exam-card {
+    height: 100%;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    text-align: center;
+}
 
-    .exam-card h3 {
-        color: #1E3D58;
-        margin: 0 0 20px 0;
-        font-size: 22px;
-    }
+.exam-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
 
-    .exam-card p {
-        color: #555;
-        margin: 15px 0;
-        font-size: 15px;
-    }
+.exam-card .card-title {
+    color: #1E3D58;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.exam-card .card-text {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.exam-card .text-muted {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.exam-card .text-muted i {
+    margin-right: 8px;
+    color: #667eea;
+}
+
+/* BUTTONS */
+.exam-card .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.exam-card .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
 
 /* STATUS BADGES */
 .status-badge {
@@ -62,22 +103,36 @@ body {
     color: #155724;
 }
 
-/* NAVLINK BUTTONS - 匹配页面中使用的 NavLink */
-.exam-card a {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 12px 35px;
-    background: #e63946;
-    color: white;
-    text-decoration: none;
-    border-radius: 30px;
-    font-weight: bold;
-    transition: background-color 0.3s;
+/* LOADING STATE */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3rem;
+    color: #667eea;
 }
 
-    .exam-card a:hover {
-        background: #c92f3b;
-    }
+/* ALERTS */
+.alert {
+    border-radius: 10px;
+    border: none;
+    padding: 1.25rem;
+    font-size: 1.05rem;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.alert a {
+    font-weight: 600;
+    text-decoration: underline;
+}
 
 /* EXAM INFO */
 .exam-info {
@@ -130,6 +185,13 @@ body {
         font-size: 16px;
     }
 
+/* PAGE HEADING */
+h2 {
+    color: #1E3D58;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
     .exam-list {
@@ -142,7 +204,12 @@ body {
         padding: 20px;
     }
 
-        .exam-card h3 {
-            font-size: 18px;
+        .exam-card .card-title {
+            font-size: 1.25rem;
+        }
+
+        .exam-card .btn-primary {
+            padding: 10px 20px;
+            font-size: 0.95rem;
         }
 }

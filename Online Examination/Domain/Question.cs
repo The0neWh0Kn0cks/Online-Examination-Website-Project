@@ -4,7 +4,7 @@ namespace Online_Examination.Domain
 {
     public class Question : BaseDomainModel // <--- 继承基类
     {
-        [Required(ErrorMessage = "请输入题目内容")]
+        [Required]
         public string Text { get; set; } = string.Empty;
 
         // --- 选项整合 ---
@@ -15,6 +15,12 @@ namespace Online_Examination.Domain
 
         [Required]
         public string CorrectAnswer { get; set; } = "A"; // 存储 "A", "B"...
+
+        // --- Multimedia Support: For Math/Science questions with diagrams ---
+        public string? ImageUrl { get; set; }
+
+        // --- Reading Comprehension: For Language questions with passages ---
+        public string? ReadingPassage { get; set; }
 
         // --- 外键：属于哪张卷子 ---
         public int ExamId { get; set; }

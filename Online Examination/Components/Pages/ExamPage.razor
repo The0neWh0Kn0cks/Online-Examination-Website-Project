@@ -1,21 +1,101 @@
-﻿@page "/exams-page"
+﻿@page "/exams"
+@inject StudentService StudentService
+@inject UserSession UserSession
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
 
 <HeadContent>
-    <link rel="stylesheet" href="/css/my-exams-page.css">
+    <link rel="stylesheet" href="/css/exams-page.css">
 </HeadContent>
 
-<section class="exam-list">
-    <div class="exam-card">
-        <h3>Mathematics Mock Test</h3>
-        <NavLink href="/exam-index">Start Exam</NavLink>
-    </div>
+<PageTitle>Available Exams</PageTitle>
 
-    <div class="exam-card">
-        <h3>Science Mock Test</h3>
-        <NavLink href="/exam-index">Start Exam</NavLink>
-    </div>
-</section>
+<div class="container mt-4">
+    <h2 class="mb-4">Available Exams</h2>
+
+    @if (!UserSession.IsLoggedIn)
+    {
+        <div class="alert alert-warning">
+            Please <a href="/login">login</a> to view available exams.
+        </div>
+    }
+    else if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading exams...</p>
+        </div>
+    }
+    else if (exams == null || !exams.Any())
+    {
+        <div class="alert alert-info">
+            No exams available at this time.
+        </div>
+    }
+    else
+    {
+        <section class="exam-list">
+            <div class="row">
+                @foreach (var exam in exams)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card exam-card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">@exam.Title</h5>
+                                <p class="card-text">@exam.Description</p>
+                                <p class="text-muted">
+                                    <i class="bi bi-clock"></i> Time Limit: @exam.TimeLimitMinutes minutes
+                                </p>
+                                <p class="text-muted">
+                                    <i class="bi bi-question-circle"></i> Questions: @exam.Questions.Count
+                                </p>
+                                <button class="btn btn-primary w-100" @onclick="() => StartExam(exam.Id)">
+                                    Start Exam
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>
 
 @code {
+    // List to hold all available exams
+    private List<Exam> exams = new List<Exam>();
+    private bool isLoading = true;
 
+    // Called when component is initialized
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if user is logged in
+        if (!UserSession.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            // Fetch all exams from database
+            exams = await StudentService.GetAllExamsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading exams: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Navigate to TakeExam page with the selected exam ID
+    private void StartExam(int examId)
+    {
+        Navigation.NavigateTo($"/take-exam/{examId}");
+    }
 }

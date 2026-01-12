@@ -1,0 +1,143 @@
+/* Take Exam Page Styles */
+
+.exam-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.exam-header h2 {
+    margin-bottom: 0.5rem;
+}
+
+.question-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+/* Reading Passage Styling */
+.reading-passage {
+    background-color: #f8f9fa;
+    border-left: 4px solid #667eea;
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.reading-passage h6 {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.reading-passage .passage-text {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #333;
+    white-space: pre-wrap;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* Question Image Styling */
+.question-image {
+    margin-bottom: 1.5rem;
+}
+
+.question-image img {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.question-image img:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+}
+
+.card {
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.options {
+    padding-left: 1rem;
+}
+
+.form-check {
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.form-check:hover {
+    background-color: #f8f9fa;
+}
+
+.form-check-input {
+    cursor: pointer;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.25rem;
+}
+
+.form-check-label {
+    cursor: pointer;
+    margin-left: 0.5rem;
+    font-size: 1rem;
+}
+
+.btn-success {
+    padding: 0.75rem 3rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .exam-header {
+        padding: 1.5rem;
+    }
+
+    .question-text {
+        font-size: 1rem;
+    }
+
+    .btn-success {
+        padding: 0.6rem 2rem;
+        font-size: 1rem;
+    }
+
+    .reading-passage {
+        padding: 1rem;
+    }
+
+    .reading-passage .passage-text {
+        font-size: 0.95rem;
+    }
+
+    .question-image img {
+        max-height: 300px !important;
+    }
+}

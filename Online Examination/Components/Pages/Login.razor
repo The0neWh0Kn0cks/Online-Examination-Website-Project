@@ -1,5 +1,9 @@
 ﻿@page "/login"
 @layout EmptyLayout
+@inject NavigationManager Navigation
+@inject StudentService StudentService
+@inject UserSession UserSession
+@rendermode InteractiveServer
 
 <HeadContent>
     <link rel="stylesheet" href="/css/loginstyle.css">
@@ -18,18 +22,34 @@
     <div class="login-box">
         <h1>Login</h1>
 
-        <form>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                @errorMessage
+            </div>
+        }
+
+        <form @onsubmit="HandleLogin">
             <label>Email</label>
-            <input type="email" placeholder="Enter your email" required>
+            <input type="email" @bind="email" placeholder="Enter your email" required>
 
             <label>Password</label>
-            <input type="password" placeholder="Enter your password" required>
+            <input type="password" @bind="password" placeholder="Enter your password" required>
 
             <div class="forgot">
                 <a href="/forgot-password">Forgot password?</a>
             </div>
 
-            <button type="submit">Login</button>
+            <button type="submit" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span>Logging in...</span>
+                }
+                else
+                {
+                    <span>Login</span>
+                }
+            </button>
         </form>
 
         <p class="note">
@@ -43,5 +63,50 @@
 </footer>
 
 @code {
-    
+    // Two-way binding fields for email and password
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    // Handle form submission
+    private async Task HandleLogin()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+
+            // Call StudentService to authenticate user
+            var user = await StudentService.LoginAsync(email, password);
+
+            if (user != null)
+            {
+                // Store user info in UserSession (scoped service)
+                UserSession.SetUser(user.Id, user.Username, user.Email, user.Role);
+
+                // Navigate based on role
+                if (user.Role == "Admin")
+                {
+                    Navigation.NavigateTo("/admin-dashboard");
+                }
+                else
+                {
+                    Navigation.NavigateTo("/exams");
+                }
+            }
+            else
+            {
+                errorMessage = "Invalid email or password.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Login failed: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 }

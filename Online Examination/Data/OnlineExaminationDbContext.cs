@@ -52,6 +52,20 @@ namespace Online_Examination.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            // === FIX: Resolve Multiple Cascade Paths Error for Attempts Table ===
+            // Configure Attempt entity relationships to prevent cascade delete conflicts
+            modelBuilder.Entity<Attempt>()
+                .HasOne(a => a.User)
+                .WithMany(u => u.Attempts)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Restrict);  // Prevent automatic deletion of attempts when user is deleted
+
+            modelBuilder.Entity<Attempt>()
+                .HasOne(a => a.Exam)
+                .WithMany(e => e.Attempts)
+                .HasForeignKey(a => a.ExamId)
+                .OnDelete(DeleteBehavior.Restrict);  // Prevent automatic deletion of attempts when exam is deleted
         }
     }
 }
