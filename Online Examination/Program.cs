@@ -1,56 +1,118 @@
+ï»¿using Domain;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Online_Examination.Components;
+using Online_Examination.Components.Account;
 using Online_Examination.Data;
+// using Online_Examination.Domain; // å¦‚æœä¸å†ä½¿ç”¨æ—§çš„ User ç±»ï¼Œè¿™è¡Œå¯èƒ½ä¸éœ€è¦äº†
 using Online_Examination.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ====================================================
-// 1. ·şÎñ×¢²áÇø (Add Services)
+// 1. æ·»åŠ æœåŠ¡ (Add Services)
 // ====================================================
 
-// Ìí¼Ó Blazor ·şÎñ (Ö§³Ö·şÎñ¶Ë½»»¥äÖÈ¾)
+// æ·»åŠ  Blazor æœåŠ¡
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// --- ºËĞÄÅäÖÃ A: Êı¾İ¿âÁ¬½Ó ---
-// ¶ÁÈ¡ appsettings.json ÀïµÄ "DefaultConnection"
+// æ·»åŠ  Controllers æ”¯æŒ (API)
+builder.Services.AddControllers();
+
+// é…ç½® Authentication çŠ¶æ€çº§è”
+builder.Services.AddCascadingAuthenticationState();
+
+// é…ç½® HttpClient
+builder.Services.AddScoped(sp =>
+{
+    var navigationManager = sp.GetRequiredService<NavigationManager>();
+    return new HttpClient
+    {
+        BaseAddress = new Uri(navigationManager.BaseUri)
+    };
+});
+
+// --- æ ¸å¿ƒä¿®æ”¹ A: æ•°æ®åº“ä¸Šä¸‹æ–‡ ---
+// å¿…é¡»ä½¿ç”¨ä¸ Identity è„šæ‰‹æ¶ä¸€è‡´çš„ Context (Online_ExaminationContext)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<Online_ExaminationContext>(options =>
     options.UseSqlServer(connectionString));
-// ×¢Òâ: Èç¹ûÄãÓÃµÄÊÇ SQLite£¬ÕâÀïÒª¸Ä³É options.UseSqlite(connectionString)
 
-// --- ºËĞÄÅäÖÃ B: ×¢²áÄãµÄ×Ô¶¨Òå·şÎñ ---
-// AddScoped ±íÊ¾£ºÃ¿´Î HTTP ÇëÇó´´½¨Ò»¸öĞÂµÄÊµÀı (×îÊÊºÏÊı¾İ¿â²Ù×÷µÄ·şÎñ)
+// --- æ ¸å¿ƒä¿®æ”¹ B: é”™è¯¯ä¿®æ­£åçš„ Identity é…ç½® ---
+// åˆ é™¤äº†å†²çªçš„ AddIdentity<User>ï¼Œåˆå¹¶ä½¿ç”¨è„šæ‰‹æ¶ç”Ÿæˆçš„é…ç½®
+builder.Services.AddIdentityCore<Online_ExaminationUser>(options =>
+{
+    // 1. ç™»å½•è¦æ±‚ (ä»è„šæ‰‹æ¶ä¿ç•™)
+    options.SignIn.RequireConfirmedAccount = true;
+
+    // 2. å¯†ç å¼ºåº¦è®¾ç½® (ä»ä½ æ—§ä»£ç è¿ç§»è¿‡æ¥çš„å®½æ¾è®¾ç½®ï¼Œæ–¹ä¾¿æµ‹è¯•)
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6;
+
+    // 3. ç”¨æˆ·å/é‚®ç®±è®¾ç½®
+    options.User.RequireUniqueEmail = true;
+})
+    .AddEntityFrameworkStores<Online_ExaminationContext>() // ç¡®ä¿è¿™é‡ŒæŒ‡å‘æ–°çš„ Context
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
+
+// é…ç½® Cookie è®¤è¯ (Blazor Identity å¿…éœ€)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
+    .AddIdentityCookies();
+
+// --- æ ¸å¿ƒä¿®æ”¹ C: Identity è¾…åŠ©æœåŠ¡ ---
+// è¿™äº›æ˜¯è„šæ‰‹æ¶ç”Ÿæˆçš„è¾…åŠ©ç±»ï¼Œç¡®ä¿å®ƒä»¬èƒ½æ­£å¸¸å·¥ä½œ
+builder.Services.AddSingleton<IEmailSender<Online_ExaminationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<IdentityUserAccessor>();
+builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+// --- ä¸šåŠ¡æœåŠ¡ ---
 builder.Services.AddScoped<StudentService>();
 builder.Services.AddScoped<UserSession>();
 
+
 // ====================================================
-// 2. ¹ÜµÀ¹¹½¨Çø (Build App)
+// 2. æ„å»ºåº”ç”¨ (Build App)
 // ====================================================
 
 var app = builder.Build();
 
-// ÅäÖÃ HTTP ÇëÇó¹ÜµÀ
+// é…ç½® HTTP è¯·æ±‚ç®¡é“
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // HSTS ÖµÄ¬ÈÏÎª 30 Ìì£¬Éú²ú»·¾³½¨Òé¸Ä´ó
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
-// --- ºËĞÄÅäÖÃ C: ¾²Ì¬ÎÄ¼ş ---
-// ÕâÒ»ĞĞ·Ç³£ÖØÒª£¡Ã»ÓĞËü£¬ÄãµÄ CSS/JS/Í¼Æ¬ ¶¼¼ÓÔØ²»³öÀ´
 app.UseStaticFiles();
-
 app.UseAntiforgery();
 
-// Ó³Éä Blazor ×é¼ş
+// è®¤è¯ä¸æˆæƒä¸­é—´ä»¶
+app.UseAuthentication();
+app.UseAuthorization();
+
+// æ˜ å°„ API Controllers
+app.MapControllers();
+
+// æ˜ å°„ Blazor ç»„ä»¶
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode(); // ¿ªÆô½»»¥Ä£Ê½£¬·ñÔò°´Å¥µã»÷Ã»·´Ó¦
+    .AddInteractiveServerRenderMode();
+
+// æ˜ å°„ Identity ç«¯ç‚¹ (ç™»å½•/æ³¨é”€ç­‰é€»è¾‘)
+app.MapAdditionalIdentityEndpoints();
 
 app.Run();

@@ -83,7 +83,12 @@
             if (user != null)
             {
                 // Store user info in UserSession (scoped service)
-                UserSession.SetUser(user.Id, user.Username, user.Email, user.Role);
+                UserSession.SetUser(
+                    user.Id, 
+                    user.UserName ?? "Unknown", 
+                    user.Email ?? "unknown@email.com", 
+                    user.Role
+                );
 
                 // ✅ 修改部分：根据角色进行分流跳转
                 if (user.Role == "Admin")

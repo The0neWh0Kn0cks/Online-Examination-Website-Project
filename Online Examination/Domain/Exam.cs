@@ -14,7 +14,7 @@ namespace Online_Examination.Domain
         public int TimeLimitMinutes { get; set; } = 60;
 
         // --- 外键：老师 ---
-        public int CreatorId { get; set; }
+        public string CreatorId { get; set; }
         public User? Creator { get; set; }
 
         // --- 导航属性 ---

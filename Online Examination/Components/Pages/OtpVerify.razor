@@ -1,0 +1,74 @@
+﻿@page "/otp-verify"
+@inject NavigationManager Navigation
+
+<PageTitle>Verify OTP | Examination Board</PageTitle>
+
+<HeadContent>
+    @* 引用新的独立 css *@
+    <link rel="stylesheet" href="/css/otpstyle.css" />
+</HeadContent>
+
+<div class="otp-page">
+    <div class="otp-box">
+        <h1>Verification</h1>
+
+        <p class="instruction">
+            We have sent a code to <strong>@Email</strong>.<br>
+            Please enter the code below.
+        </p>
+
+        @* 消息提示区域 (UI逻辑保留，但默认不显示) *@
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="alert-message @(isError ? "alert-error" : "alert-success")">
+                @message
+            </div>
+        }
+
+        <div class="form-content">
+            <div class="otp-section-wrapper">
+                <label>OTP Code</label>
+
+                <div class="otp-inline-group">
+                    <input type="text"
+                           placeholder="6-digit code"
+                           maxlength="6"
+                           @bind="otpCode"
+                           @bind:event="oninput"
+                           class="form-control otp-input" />
+
+                    <button class="btn-verify" @onclick="VerifyOtp" disabled="@isProcessing">
+                        @(isProcessing ? "Verifying..." : "Verify")
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <p class="back">
+            <a href="forgot-password">← Change Email</a>
+        </p>
+    </div>
+</div>
+
+@code {
+    // 接收 URL 中的 email 参数
+    [SupplyParameterFromQuery]
+    public string? Email { get; set; }
+
+    // 前端绑定的变量
+    private string? otpCode;
+    private string? message; // 控制提示框内容
+    private bool isError = false; // 控制提示框颜色
+    private bool isProcessing = false; // 控制按钮禁用状态
+
+    // 仅保留空的方法签名，防止页面报错
+    private void VerifyOtp()
+    {
+        // 暂无逻辑
+    }
+
+    private void ResendCode()
+    {
+        // 暂无逻辑
+    }
+}

@@ -1,115 +1,233 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
-    color: #333;
+/* GLOBAL RESET */
+* {
+    box-sizing: border-box;
 }
 
-/* NAVBAR */
-.navbar {
-    background-color: #000;
-    color: white;
-    padding: 15px 40px;
+/* 覆盖 MainLayout 的 body 样式 */
+body:has(.forgot-page) {
+    background-color: #f9f9f9;
+}
+
+/* 让 page-container 不影响 forgot-page */
+.page-container:has(.forgot-page) main {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    flex: 1;
+    background-color: #f9f9f9;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.navbar nav a {
-    color: white;
-    margin-left: 25px;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.navbar nav a:hover {
-    text-decoration: underline;
-}
-
-/* FORGOT PASSWORD PAGE */
+/* 页面容器 */
 .forgot-page {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: calc(100vh - 120px);
+    flex: 1;
+    width: 100%;
+    padding: 20px;
+    background-color: #f9f9f9;
 }
 
+/* 白色卡片 */
 .forgot-box {
     background: white;
-    padding: 40px;
-    width: 380px;
+    padding: 40px 30px;
+    width: 100%;
+    max-width: 380px;
     border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);
     text-align: center;
 }
 
-.forgot-box h1 {
-    margin-bottom: 15px;
-    color: #1E3D58;
-}
+    .forgot-box h1 {
+        margin: 0 0 10px 0;
+        color: #1E3D58;
+        font-size: 28px;
+        font-weight: 500;
+    }
 
 .instruction {
-    font-size: 14px;
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
     margin-bottom: 25px;
-    color: #555;
 }
 
-/* FORM */
-.forgot-box label {
-    display: block;
+/* 表单组通用样式 */
+.form-group {
     text-align: left;
-    margin-bottom: 5px;
-    font-weight: bold;
+    margin-bottom: 15px;
 }
 
-.forgot-box input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 25px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #333;
+    font-size: 14px;
+    text-align: left;
 }
 
-/* BUTTON */
-.forgot-box button {
+.form-control {
     width: 100%;
-    padding: 12px;
-    background-color: #e63946;
-    color: white;
-    border: none;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    background-color: #fff;
+}
+
+    .form-control::placeholder {
+        color: #aaa;
+    }
+
+    .form-control:focus {
+        border-color: #E63946;
+    }
+
+/* 红色大按钮 (Send Code) - 使用 !important 覆盖全局样式 */
+.forgot-page .btn-primary {
+    background-color: #E63946 !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-radius: 50px !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    margin-bottom: 10px !important;
+    transition: background-color 0.3s !important;
+}
+
+    .forgot-page .btn-primary:hover:not(:disabled) {
+        background-color: #d62839 !important;
+    }
+
+    .forgot-page .btn-primary:disabled {
+        background-color: #ff8a93 !important;
+        cursor: default !important;
+    }
+
+/* Resend Code 文本样式 */
+.resend-text {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+    padding: 10px 0;
+}
+
+    .resend-text a {
+        color: #E63946;
+        text-decoration: none;
+        font-weight: 600;
+        margin-left: 5px;
+    }
+
+        .resend-text a:hover {
+            text-decoration: underline;
+        }
+
+/* --- OTP 区域样式 --- */
+.otp-section-wrapper {
+    margin-top: 15px;
+    text-align: left;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.otp-label {
     font-size: 16px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: bold;
+    margin-bottom: 5px;
+    color: #000;
+    font-weight: 700;
+    display: block;
 }
 
-.forgot-box button:hover {
-    background-color: #c92f3b;
+/* OTP 输入框和 Verify 按钮并排 */
+.otp-inline-group {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.otp-input {
+    flex: 1;
+    border: 2px solid #000 !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
+    font-size: 16px !important;
+    text-align: left !important;
+    outline: none !important;
+}
+
+    .otp-input:focus {
+        box-shadow: 0 0 5px rgba(0,0,0,0.2) !important;
+        border-color: #000 !important;
+    }
+
+/* Verify Code 小按钮 */
+.btn-verify {
+    background-color: #E63946 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: background-color 0.3s !important;
+    width: auto !important;
+}
+
+    .btn-verify:hover {
+        background-color: #d62839 !important;
+    }
+
+/* 消息提示框 */
+.alert-message {
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    text-align: left;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
 }
 
 .back {
     margin-top: 20px;
-}
-
-.back a {
-    text-decoration: none;
-    color: #2A4D69;
     font-size: 14px;
 }
 
-.back a:hover {
-    text-decoration: underline;
-}
+    .back a {
+        text-decoration: none;
+        color: #666;
+    }
 
-/* FOOTER */
-footer {
-    background-color: #000;
-    color: white;
-    text-align: center;
-    padding: 15px;
+        .back a:hover {
+            color: #E63946;
+        }
+
+/* 动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
