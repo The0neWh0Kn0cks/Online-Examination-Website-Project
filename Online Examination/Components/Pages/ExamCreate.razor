@@ -52,18 +52,23 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
+                                        <label for="level" class="form-label">Education Level <span class="text-danger">*</span></label>
+                                        <InputSelect id="level" class="form-select" @bind-Value="newExam.Level">
+                                            <option value="@EducationLevel.PSLE">PSLE</option>
+                                            <option value="@EducationLevel.N_O_Level">N/O Level</option>
+                                            <option value="@EducationLevel.Poly">Polytechnic</option>
+                                        </InputSelect>
+                                        <small class="form-text text-muted">Select the target education level for this exam.</small>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
                                         <label for="timeLimit" class="form-label">Time Limit (minutes) <span class="text-danger">*</span></label>
                                         <InputNumber id="timeLimit" class="form-control" @bind-Value="newExam.TimeLimitMinutes" placeholder="60" />
                                         <ValidationMessage For="@(() => newExam.TimeLimitMinutes)" />
                                     </div>
-                                </div>
 
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <InputTextArea id="description" class="form-control" @bind-Value="newExam.Description" rows="3" placeholder="Enter exam description..." />
-                                </div>
-
-                                <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="accessCode" class="form-label">Access Code <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -75,7 +80,14 @@
                                         <ValidationMessage For="@(() => newExam.AccessCode)" />
                                         <small class="form-text text-muted">Students will use this code to access the exam.</small>
                                     </div>
+                                </div>
 
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <InputTextArea id="description" class="form-control" @bind-Value="newExam.Description" rows="3" placeholder="Enter exam description..." />
+                                </div>
+
+                                <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label d-block">Publish Status</label>
                                         <div class="form-check form-switch mt-2">

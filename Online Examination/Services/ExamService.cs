@@ -47,6 +47,7 @@ namespace Online_Examination.Services
             existingExam.Description = exam.Description;
             existingExam.TimeLimitMinutes = exam.TimeLimitMinutes;
             existingExam.IsPublished = exam.IsPublished;
+            existingExam.Level = exam.Level;
 
             if (!string.IsNullOrWhiteSpace(exam.AccessCode) && exam.AccessCode != existingExam.AccessCode)
             {
@@ -81,6 +82,7 @@ namespace Online_Examination.Services
             return await _context.Exams
                 .Include(e => e.Creator)
                 .Include(e => e.Questions)
+                .Include(e => e.Attempts)
                 .OrderByDescending(e => e.DateCreated)
                 .ToListAsync();
         }
@@ -97,6 +99,7 @@ namespace Online_Examination.Services
         {
             return await _context.Exams
                 .Include(e => e.Questions)
+                .Include(e => e.Creator)
                 .FirstOrDefaultAsync(e => e.Id == examId);
         }
 
@@ -249,6 +252,8 @@ namespace Online_Examination.Services
         {
             return await _context.Attempts
                 .Include(a => a.Exam)
+                    .ThenInclude(e => e.Questions)
+                .Include(a => a.User)
                 .Where(a => a.UserId == userId)
                 .OrderByDescending(a => a.DateCreated)
                 .ToListAsync();

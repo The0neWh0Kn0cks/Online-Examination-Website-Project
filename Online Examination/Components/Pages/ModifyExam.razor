@@ -1,114 +1,348 @@
-﻿@page "/modify-exams"
-@page "/modify-exams/{examId:int}"
+﻿@page "/modify-exams/{ExamId:int}"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@inject ExamService ExamService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode InteractiveServer
 
-<PageTitle>Modify Exam | Examination Board</PageTitle>
+@using Online_Examination.Domain
+@using Online_Examination.Services
+@using Microsoft.AspNetCore.Components.Authorization
 
-<HeadContent>
-    <link rel="stylesheet" href="/css/modify-exams.css">
-</HeadContent>
+<PageTitle>Edit Exam | Examination Board</PageTitle>
 
-<section class="editor">
-    <h2>@(ExamId.HasValue ? "Edit Exam" : "Create Exam")</h2>
-
-    <form @onsubmit="HandleSubmit">
-        <div class="form-group">
-            <label>Exam Name</label>
-            <input type="text"
-                   placeholder="Enter exam name"
-                   @bind="examName"
-                   required />
-        </div>
-
-        <div class="form-group">
-            <label>Category</label>
-            <select @bind="category" required>
-                <option value="">Select Category</option>
-                <option value="Primary School">Primary School</option>
-                <option value="Secondary School">Secondary School</option>
-                <option value="Polytechnic / JC">Polytechnic / JC</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Description</label>
-            <textarea placeholder="Enter exam description"
-                      @bind="description"
-                      rows="4"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Time Limit (minutes)</label>
-            <input type="number"
-                   placeholder="Enter time limit"
-                   @bind="timeLimit"
-                   min="1"
-                   max="180"
-                   required />
-        </div>
-
-        <div class="button-group">
-            <button type="submit" class="save-btn">
-                @(ExamId.HasValue ? "Update Exam" : "Create Exam")
-            </button>
-            <NavLink href="/exam-index" class="cancel-btn">Cancel</NavLink>
-        </div>
-    </form>
-
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <div class="message @messageType">
-            @message
-        </div>
-    }
-</section>
-
-@code {
-    [Parameter]
-    public int? ExamId { get; set; }
-
-    private string? examName;
-    private string? category;
-    private string? description;
-    private int timeLimit = 60;
-    private string? message;
-    private string messageType = "success";
-
-    protected override void OnInitialized()
-    {
-        if (ExamId.HasValue)
-        {
-            LoadExamData(ExamId.Value);
-        }
-    }
-
-    private void LoadExamData(int id)
-    {
-        // TODO: 从数据库加载
-        examName = "Sample Exam";
-        category = "Primary School";
-        description = "Sample description";
-        timeLimit = 60;
-    }
-
-    private void HandleSubmit()
-    {
-        try
-        {
-            if (ExamId.HasValue)
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            @if (isLoading)
             {
-                message = $"Exam '{examName}' updated successfully!";
+                <div class="text-center mt-5">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading exam...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading exam data...</p>
+                </div>
+            }
+            else if (exam == null)
+            {
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> Exam not found.
+                    <a href="/exam-index" class="btn btn-sm btn-primary ms-3">Back to Exam List</a>
+                </div>
             }
             else
             {
-                message = $"Exam '{examName}' created successfully!";
+                <div class="card shadow">
+                    <div class="card-header bg-warning text-dark">
+                        <h3 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Exam</h3>
+                    </div>
+                    <div class="card-body">
+                        <EditForm Model="@exam" OnValidSubmit="@HandleSaveExam">
+                            <DataAnnotationsValidator />
+
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-exclamation-triangle"></i> @errorMessage
+                                    <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(successMessage))
+                            {
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-check-circle"></i> @successMessage
+                                    <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+                                </div>
+                            }
+
+                            <!-- Exam Details Section -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Exam Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="title" class="form-label">Exam Title <span class="text-danger">*</span></label>
+                                            <InputText id="title" class="form-control" @bind-Value="exam.Title" placeholder="e.g. Mathematics Final Exam" />
+                                            <ValidationMessage For="@(() => exam.Title)" />
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="level" class="form-label">Education Level <span class="text-danger">*</span></label>
+                                            <InputSelect id="level" class="form-select" @bind-Value="exam.Level">
+                                                <option value="@EducationLevel.PSLE">PSLE</option>
+                                                <option value="@EducationLevel.N_O_Level">N/O Level</option>
+                                                <option value="@EducationLevel.Poly">Polytechnic</option>
+                                            </InputSelect>
+                                            <small class="form-text text-muted">Select the target education level for this exam.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="timeLimit" class="form-label">Time Limit (minutes) <span class="text-danger">*</span></label>
+                                            <InputNumber id="timeLimit" class="form-control" @bind-Value="exam.TimeLimitMinutes" placeholder="60" />
+                                            <ValidationMessage For="@(() => exam.TimeLimitMinutes)" />
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="accessCode" class="form-label">Access Code <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <InputText id="accessCode" class="form-control" @bind-Value="exam.AccessCode" placeholder="Enter or generate code" />
+                                                <button type="button" class="btn btn-outline-secondary" @onclick="GenerateAccessCode">
+                                                    <i class="bi bi-shuffle"></i> Generate
+                                                </button>
+                                            </div>
+                                            <ValidationMessage For="@(() => exam.AccessCode)" />
+                                            <small class="form-text text-muted">Students will use this code to access the exam.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description</label>
+                                        <InputTextArea id="description" class="form-control" @bind-Value="exam.Description" rows="3" placeholder="Enter exam description..." />
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label d-block">Publish Status</label>
+                                            <div class="form-check form-switch mt-2">
+                                                <InputCheckbox id="isPublished" class="form-check-input" @bind-Value="exam.IsPublished" />
+                                                <label class="form-check-label" for="isPublished">
+                                                    @(exam.IsPublished ? "Published (Students can access)" : "Draft (Not visible to students)")
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Questions Section -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Questions (@exam.Questions.Count)</h5>
+                                    <button type="button" class="btn btn-sm btn-success" @onclick="AddQuestion">
+                                        <i class="bi bi-plus-circle"></i> Add Question
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    @if (!exam.Questions.Any())
+                                    {
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle"></i> No questions added yet. Click "Add Question" to start building your exam.
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var (question, index) in exam.Questions.Select((q, i) => (q, i)))
+                                        {
+                                            <div class="card mb-3 border-primary">
+                                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                                    <h6 class="mb-0">Question @(index + 1)</h6>
+                                                    <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveQuestion(question)">
+                                                        <i class="bi bi-trash"></i> Remove
+                                                    </button>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Question Text <span class="text-danger">*</span></label>
+                                                        <textarea class="form-control" @bind="question.Text" rows="2" placeholder="Enter question text" required></textarea>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-2">
+                                                            <label class="form-label">Option A <span class="text-danger">*</span></label>
+                                                            <input type="text" class="form-control" @bind="question.OptionA" placeholder="Option A" required />
+                                                        </div>
+                                                        <div class="col-md-6 mb-2">
+                                                            <label class="form-label">Option B <span class="text-danger">*</span></label>
+                                                            <input type="text" class="form-control" @bind="question.OptionB" placeholder="Option B" required />
+                                                        </div>
+                                                        <div class="col-md-6 mb-2">
+                                                            <label class="form-label">Option C <span class="text-danger">*</span></label>
+                                                            <input type="text" class="form-control" @bind="question.OptionC" placeholder="Option C" required />
+                                                        </div>
+                                                        <div class="col-md-6 mb-2">
+                                                            <label class="form-label">Option D <span class="text-danger">*</span></label>
+                                                            <input type="text" class="form-control" @bind="question.OptionD" placeholder="Option D" required />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row mt-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Correct Answer <span class="text-danger">*</span></label>
+                                                            <select class="form-select" @bind="question.CorrectAnswer" required>
+                                                                <option value="">-- Select Correct Answer --</option>
+                                                                <option value="A">A</option>
+                                                                <option value="B">B</option>
+                                                                <option value="C">C</option>
+                                                                <option value="D">D</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Image URL (Optional)</label>
+                                                            <input type="text" class="form-control" @bind="question.ImageUrl" placeholder="https://example.com/image.jpg" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-3">
+                                                        <label class="form-label">Reading Passage (Optional)</label>
+                                                        <textarea class="form-control" @bind="question.ReadingPassage" rows="3" placeholder="For comprehension questions, enter the reading passage here..."></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </button>
+                                <button type="submit" class="btn btn-warning btn-lg" disabled="@isSaving">
+                                    @if (isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                        <span>Saving Changes...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-save"></i>
+                                        <span>Save Changes</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
             }
-            messageType = "success";
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ExamId { get; set; }
+
+    private Exam? exam;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private bool isSaving = false;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            exam = await ExamService.GetExamForEditAsync(ExamId);
+
+            if (exam == null)
+            {
+                errorMessage = "Exam not found.";
+            }
         }
         catch (Exception ex)
         {
-            message = $"Error: {ex.Message}";
-            messageType = "error";
+            errorMessage = $"Error loading exam: {ex.Message}";
         }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GenerateAccessCode()
+    {
+        if (exam != null)
+        {
+            exam.AccessCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+        }
+    }
+
+    private void AddQuestion()
+    {
+        if (exam != null)
+        {
+            exam.Questions.Add(new Question
+            {
+                ExamId = exam.Id,
+                Text = string.Empty,
+                OptionA = string.Empty,
+                OptionB = string.Empty,
+                OptionC = string.Empty,
+                OptionD = string.Empty,
+                CorrectAnswer = "A"
+            });
+        }
+    }
+
+    private void RemoveQuestion(Question question)
+    {
+        if (exam != null)
+        {
+            exam.Questions.Remove(question);
+        }
+    }
+
+    private async Task HandleSaveExam()
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        if (exam == null)
+        {
+            errorMessage = "Exam data is not loaded.";
+            return;
+        }
+
+        if (!exam.Questions.Any())
+        {
+            errorMessage = "Please add at least one question to the exam.";
+            return;
+        }
+
+        var invalidQuestions = exam.Questions.Where(q =>
+            string.IsNullOrWhiteSpace(q.Text) ||
+            string.IsNullOrWhiteSpace(q.OptionA) ||
+            string.IsNullOrWhiteSpace(q.OptionB) ||
+            string.IsNullOrWhiteSpace(q.OptionC) ||
+            string.IsNullOrWhiteSpace(q.OptionD) ||
+            string.IsNullOrWhiteSpace(q.CorrectAnswer)
+        ).ToList();
+
+        if (invalidQuestions.Any())
+        {
+            errorMessage = $"Please complete all required fields for all questions. Found {invalidQuestions.Count} incomplete question(s).";
+            return;
+        }
+
+        try
+        {
+            isSaving = true;
+
+            var updatedExam = await ExamService.UpdateExamAsync(exam);
+
+            successMessage = $"Exam '{updatedExam.Title}' updated successfully!";
+
+            await Task.Delay(1500);
+            Navigation.NavigateTo("/exam-index");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error updating exam: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/exam-index");
     }
 }

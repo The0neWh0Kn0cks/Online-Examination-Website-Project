@@ -3,6 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Online_Examination.Domain
 {
+    public enum EducationLevel
+    {
+        PSLE = 0,
+        N_O_Level = 1,
+        Poly = 2
+    }
+
     [Index(nameof(AccessCode), IsUnique = true)]
     public class Exam : BaseDomainModel
     {
@@ -20,6 +27,8 @@ namespace Online_Examination.Domain
         public string AccessCode { get; set; } = string.Empty;
 
         public bool IsPublished { get; set; } = false;
+
+        public EducationLevel Level { get; set; } = EducationLevel.PSLE;
 
         // --- 外键：老师 ---
         public string CreatorId { get; set; }
