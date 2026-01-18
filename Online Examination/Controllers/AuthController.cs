@@ -10,9 +10,9 @@ namespace Online_Examination.Controllers
     public class AuthController : ControllerBase
     {
         // 使用 Domain.User 而不是 ApplicationUser
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<Online_ExaminationUser> _userManager;
 
-        public AuthController(UserManager<User> userManager)
+        public AuthController(UserManager<Online_ExaminationUser> userManager)
         {
             _userManager = userManager;
         }

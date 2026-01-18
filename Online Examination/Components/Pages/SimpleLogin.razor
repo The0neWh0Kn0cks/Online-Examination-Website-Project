@@ -1,0 +1,41 @@
+
+@layout EmptyLayout
+
+<PageTitle>Simple Login</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/loginstyle.css">
+</HeadContent>
+
+<header class="navbar">
+    <div class="logo">Examination Board</div>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About Us</a>
+    </nav>
+</header>
+
+<div class="login-page">
+    <div class="login-box">
+        <h1>Login (Simple API)</h1>
+
+
+        <form action="/api/Login" method="post">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="Enter your email" required>
+
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter your password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p class="note">
+            Test account: student@test.com / Student123
+        </p>
+    </div>
+</div>
+
+<footer>
+    ? Examination Board
+</footer>

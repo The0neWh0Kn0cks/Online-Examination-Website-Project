@@ -20,6 +20,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\AppDbContext%28closed%29.cs" />
+    <Compile Remove="Domain\User.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Components\Pages\Forgot_password.razor" />
+    <Content Remove="Components\Pages\Login.razor" />
+    <Content Remove="Components\Pages\NewPassword.razor" />
+    <Content Remove="Components\Pages\ResetPassword.razor" />
+    <Content Remove="Components\Pages\SimpleLogin.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.22" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.22" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.22" />

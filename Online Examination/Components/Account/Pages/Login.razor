@@ -1,128 +1,52 @@
 ﻿@page "/Account/Login"
+@layout EmptyLayout
 
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Identity
-@using Online_Examination.Data
+<PageTitle>Login | Examination Board</PageTitle>
 
-@inject SignInManager<Online_ExaminationUser> SignInManager
-@inject ILogger<Login> Logger
-@inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
+<HeadContent>
+    <link rel="stylesheet" href="/css/loginstyle.css">
+</HeadContent>
 
-<PageTitle>Log in</PageTitle>
+<header class="navbar">
+    <div class="logo">Examination Board</div>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About Us</a>
+    </nav>
+</header>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label for="email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
-                        Remember me
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
+<div class="login-page">
+    <div class="login-box">
+        <h1>Login</h1>
+
+        <form action="/api/Login" method="post">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="Enter your email" required>
+
+            <label style="margin-top: 10px;">Password</label>
+            <input type="password" name="password" placeholder="Enter your password" required>
+
+            <button type="submit" style="margin-top: 20px;">
+                <span>Login</span>
+            </button>
+        </form>
+
+        <p class="note" style="margin-top: 20px; padding: 15px; background-color: #f0f8ff; border-radius: 5px; font-size: 0.85rem;">
+            <strong>📝 Test Accounts:</strong><br />
+            <span style="display: block; margin-top: 8px;">
+                👨‍💼 Admin: <code style="background: #e8e8e8; padding: 2px 6px; border-radius: 3px;">admin@test.com</code> / <code style="background: #e8e8e8; padding: 2px 6px; border-radius: 3px;">Admin123</code>
+            </span>
+            <span style="display: block; margin-top: 5px;">
+                👨‍🎓 Student: <code style="background: #e8e8e8; padding: 2px 6px; border-radius: 3px;">student@test.com</code> / <code style="background: #e8e8e8; padding: 2px 6px; border-radius: 3px;">Student123</code>
+            </span>
+        </p>
+
+        <p class="note">
+            Don't have an account? <a href="#">Contact your school / organization</a>
+        </p>
     </div>
 </div>
 
-@code {
-    private string? errorMessage;
-
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
-
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
-
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (HttpMethods.IsGet(HttpContext.Request.Method))
-        {
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-        }
-    }
-
-    public async Task LoginUser()
-    {
-        // This doesn't count login failures towards account lockout
-        // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-        if (result.Succeeded)
-        {
-            Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
-        }
-        else if (result.RequiresTwoFactor)
-        {
-            RedirectManager.RedirectTo(
-                "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
-        }
-        else if (result.IsLockedOut)
-        {
-            Logger.LogWarning("User account locked out.");
-            RedirectManager.RedirectTo("Account/Lockout");
-        }
-        else
-        {
-            errorMessage = "Error: Invalid login attempt.";
-        }
-    }
-
-    private sealed class InputModel
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = "";
-
-        [Required]
-        [DataType(DataType.Password)]
-        public string Password { get; set; } = "";
-
-        [Display(Name = "Remember me?")]
-        public bool RememberMe { get; set; }
-    }
-}
+<footer>
+    © Examination Board
+</footer>

@@ -1,0 +1,129 @@
+﻿@page "/student/join-exam"
+@inject ExamService ExamService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+@using Online_Examination.Services
+@using Online_Examination.Domain
+
+<PageTitle>Join Exam | Examination Board</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0"><i class="bi bi-key"></i> Join Exam</h3>
+                </div>
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @errorMessage
+                            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                        </div>
+                    }
+
+                    <div class="text-center mb-4">
+                        <i class="bi bi-mortarboard-fill text-primary" style="font-size: 4rem;"></i>
+                        <p class="text-muted mt-2">Enter your exam access code to begin</p>
+                    </div>
+
+                    <EditForm Model="@this" OnValidSubmit="@HandleJoinExam">
+                        <div class="mb-4">
+                            <label for="accessCode" class="form-label fw-bold">Access Code</label>
+                            <input type="text" 
+                                   id="accessCode" 
+                                   class="form-control form-control-lg text-center text-uppercase" 
+                                   @bind="accessCode" 
+                                   placeholder="Enter Code"
+                                   maxlength="20"
+                                   style="letter-spacing: 2px; font-weight: 500;"
+                                   required />
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle"></i> Enter the code provided by your instructor
+                            </small>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" disabled="@isLoading">
+                                @if (isLoading)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <span>Verifying...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-play-circle"></i>
+                                    <span>Start Exam</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+
+                    <div class="text-center mt-4">
+                        <a href="/user-dashboard" class="text-decoration-none">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3 border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold"><i class="bi bi-lightbulb"></i> Instructions:</h6>
+                    <ul class="small mb-0">
+                        <li>Make sure you have a stable internet connection</li>
+                        <li>Access codes are case-insensitive</li>
+                        <li>Contact your instructor if you have trouble accessing the exam</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string accessCode = string.Empty;
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    private async Task HandleJoinExam()
+    {
+        errorMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(accessCode))
+        {
+            errorMessage = "Please enter an access code.";
+            return;
+        }
+
+        try
+        {
+            isLoading = true;
+
+            var exam = await ExamService.GetExamByAccessCodeAsync(accessCode.Trim().ToUpper());
+
+            if (exam == null)
+            {
+                errorMessage = "Invalid access code. Please check and try again.";
+                isLoading = false;
+                return;
+            }
+
+            if (!exam.IsPublished)
+            {
+                errorMessage = "This exam is not currently available. Please contact your instructor.";
+                isLoading = false;
+                return;
+            }
+
+            Navigation.NavigateTo($"/student/take-exam/{exam.Id}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            isLoading = false;
+        }
+    }
+}

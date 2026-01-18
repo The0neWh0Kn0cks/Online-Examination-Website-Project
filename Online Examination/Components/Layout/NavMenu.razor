@@ -1,5 +1,6 @@
 ﻿@implements IDisposable
 @inject NavigationManager NavigationManager
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Online Examination</a>
@@ -16,34 +17,69 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
         <AuthorizeView>
             <Authorized>
+                <!-- Admin Section -->
+                <AuthorizeView Roles="Admin" Context="innerContext">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="admin-dashboard">
+                            <span class="bi bi-speedometer2" aria-hidden="true"></span> Dashboard
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="admin/exam-create">
+                            <span class="bi bi-plus-circle" aria-hidden="true"></span> Create Exam
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="exam-index">
+                            <span class="bi bi-journal-text" aria-hidden="true"></span> Manage Exams
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="modify-students">
+                            <span class="bi bi-people" aria-hidden="true"></span> Manage Students
+                        </NavLink>
+                    </div>
+                </AuthorizeView>
+
+                <!-- Student Section -->
+                <AuthorizeView Roles="Student" Context="innerContext">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="user-dashboard">
+                            <span class="bi bi-house-door" aria-hidden="true"></span> Dashboard
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="student/join-exam">
+                            <span class="bi bi-key-fill" aria-hidden="true"></span> Join Exam
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="exam-history">
+                            <span class="bi bi-clock-history" aria-hidden="true"></span> My History
+                        </NavLink>
+                    </div>
+                </AuthorizeView>
+
+                <!-- Common for All Authenticated Users -->
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
                         <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
                     </NavLink>
                 </div>
+
                 <div class="nav-item px-3">
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
+                        <button type="submit" class="nav-link" style="background:none; border:none; width:100%; text-align:left;">
                             <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
                         </button>
                     </form>
                 </div>
             </Authorized>
+
             <NotAuthorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Register">
@@ -68,6 +104,7 @@
 
 @code {
     private string? currentUrl;
+
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
@@ -84,5 +121,4 @@
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
-
 }

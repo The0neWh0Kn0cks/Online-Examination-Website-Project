@@ -1,5 +1,6 @@
 ﻿@page "/modify-exams"
 @page "/modify-exams/{examId:int}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
 
 <PageTitle>Modify Exam | Examination Board</PageTitle>
 

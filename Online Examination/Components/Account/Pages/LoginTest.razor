@@ -1,0 +1,96 @@
+@page "/Account/LoginTest"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using Online_Examination.Domain
+
+@inject SignInManager<Online_ExaminationUser> SignInManager
+@inject NavigationManager NavigationManager
+
+<PageTitle>Test Login</PageTitle>
+
+<h2>Test Login (Simplified)</h2>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 10px;">
+        @errorMessage
+    </div>
+}
+
+@if (loginSuccess)
+{
+    <div style="color: green; padding: 10px; border: 1px solid green; margin-bottom: 10px;">
+        ? Login successful! Redirecting to dashboard...
+    </div>
+    <script>
+        setTimeout(function() {
+            window.location.href = '/user-dashboard';
+        }, 1000);
+    </script>
+}
+else
+{
+    <form method="post" @onsubmit="HandleLogin" @formname="testlogin">
+        @* Antiforgery disabled for demo *@
+        
+        <div>
+            <label>Email:</label>
+            <input type="email" name="Input.Email" @bind="Input.Email" required />
+        </div>
+        
+        <div>
+            <label>Password:</label>
+            <input type="password" name="Input.Password" @bind="Input.Password" required />
+        </div>
+        
+        <button type="submit">Login</button>
+    </form>
+
+    <p>Test account: student@test.com / Student123</p>
+}
+
+@code {
+    private string? errorMessage;
+    private bool loginSuccess = false;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+        
+        try
+        {
+            var result = await SignInManager.PasswordSignInAsync(
+                Input.Email, 
+                Input.Password, 
+                isPersistent: false, 
+                lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                loginSuccess = true;
+            }
+            else
+            {
+                errorMessage = "Invalid login attempt.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        public string Password { get; set; } = "";
+    }
+}

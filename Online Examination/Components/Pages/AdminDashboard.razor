@@ -1,82 +1,331 @@
 @page "/admin-dashboard"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@inject ExamService ExamService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+@using Online_Examination.Services
 
 <PageTitle>Admin Dashboard | Examination Board</PageTitle>
 
-<HeadContent>
-    <link rel="stylesheet" href="/css/admin-dashboard.css">
-</HeadContent>
-
-<section class="dashboard">
-    <h1>Admin Dashboard</h1>
-    <p class="welcome">Welcome back, Administrator</p>
-
-    <div class="stats-container">
-        <div class="stat-card">
-            <div class="stat-icon">??</div>
-            <h3>Total Students</h3>
-            <p class="stat-number">@totalStudents</p>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">??</div>
-            <h3>Total Exams</h3>
-            <p class="stat-number">@totalExams</p>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">?</div>
-            <h3>Completed Tests</h3>
-            <p class="stat-number">@completedTests</p>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">?</div>
-            <h3>Pending Tests</h3>
-            <p class="stat-number">@pendingTests</p>
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold text-dark">
+                <i class="bi bi-speedometer2"></i> Admin Dashboard
+            </h1>
+            <p class="text-muted">Welcome back, Administrator</p>
         </div>
     </div>
 
-    <div class="dashboard-actions">
-        <div class="action-card">
-            <h2>Manage Exams</h2>
-            <p>Create, edit, or delete examinations</p>
-            <NavLink href="/exam-index" class="action-btn">Go to Exams</NavLink>
-        </div>
-
-        <div class="action-card">
-            <h2>Manage Students</h2>
-            <p>View and manage student accounts</p>
-            <NavLink href="/modify-students" class="action-btn">Go to Students</NavLink>
-        </div>
-
-        <div class="action-card">
-            <h2>View Results</h2>
-            <p>Check exam results and performance</p>
-            <NavLink href="/exam-results-index" class="action-btn">View Results</NavLink>
-        </div>
-
-        <div class="action-card">
-            <h2>Settings</h2>
-            <p>Configure system settings</p>
-            <NavLink href="#" class="action-btn">Settings</NavLink>
+    <!-- Quick Actions Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3 text-dark">
+                <i class="bi bi-lightning-charge-fill text-warning"></i> Quick Actions
+            </h3>
         </div>
     </div>
-</section>
+    
+    <div class="row mb-4">
+        <!-- Create New Exam Card - FIXED: Entire card is now clickable -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <a href="/admin/exam-create" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 hover-lift" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-plus-circle-fill text-white mb-3" style="font-size: 3rem;"></i>
+                        <h4 class="text-white mb-2">Create New Exam</h4>
+                        <p class="text-white mb-3" style="opacity: 0.9;">Design and publish a new examination</p>
+                        <span class="btn btn-light btn-lg px-4">
+                            <i class="bi bi-pencil-square"></i> Create Exam
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
 
-@code {
-    private int totalStudents = 156;
-    private int totalExams = 42;
-    private int completedTests = 1234;
-    private int pendingTests = 89;
+        <!-- Manage Exams Card - FIXED: Entire card is now clickable -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <a href="/exam-index" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 hover-lift" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-list-check text-white mb-3" style="font-size: 3rem;"></i>
+                        <h4 class="text-white mb-2">Manage Exams</h4>
+                        <p class="text-white mb-3" style="opacity: 0.9;">View, edit, or delete existing exams</p>
+                        <span class="btn btn-light btn-lg px-4">
+                            <i class="bi bi-folder-open"></i> View Exams
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
 
-    protected override void OnInitialized()
-    {
-        // TODO: 从数据库加载统计数据
-        LoadDashboardData();
+        <!-- Manage Students Card - FIXED: Entire card is now clickable -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <a href="/modify-students" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 hover-lift" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-people-fill text-white mb-3" style="font-size: 3rem;"></i>
+                        <h4 class="text-white mb-2">Manage Students</h4>
+                        <p class="text-white mb-3" style="opacity: 0.9;">View and manage student accounts</p>
+                        <span class="btn btn-light btn-lg px-4">
+                            <i class="bi bi-person-gear"></i> View Students
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3 text-dark">
+                <i class="bi bi-graph-up text-success"></i> Statistics Overview
+            </h3>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 bg-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <p class="text-muted mb-1 small text-uppercase fw-bold">TOTAL EXAMS</p>
+                            @if (isLoadingStats)
+                            {
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <h2 class="mb-0 fw-bold text-dark">@totalExams</h2>
+                            }
+                        </div>
+                        <div class="bg-primary bg-opacity-10 rounded p-3">
+                            <i class="bi bi-journal-text text-primary" style="font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi bi-check-circle text-success"></i> @publishedExams Published
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 bg-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <p class="text-muted mb-1 small text-uppercase fw-bold">TOTAL ATTEMPTS</p>
+                            @if (isLoadingStats)
+                            {
+                                <div class="spinner-border spinner-border-sm text-success" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <h2 class="mb-0 fw-bold text-dark">@totalAttempts</h2>
+                            }
+                        </div>
+                        <div class="bg-success bg-opacity-10 rounded p-3">
+                            <i class="bi bi-clipboard-check text-success" style="font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi bi-people text-primary"></i> Student submissions
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 bg-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <p class="text-muted mb-1 small text-uppercase fw-bold">TOTAL QUESTIONS</p>
+                            @if (isLoadingStats)
+                            {
+                                <div class="spinner-border spinner-border-sm text-warning" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <h2 class="mb-0 fw-bold text-dark">@totalQuestions</h2>
+                            }
+                        </div>
+                        <div class="bg-warning bg-opacity-10 rounded p-3">
+                            <i class="bi bi-question-circle text-warning" style="font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi bi-list-ul text-secondary"></i> Across all exams
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 bg-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <p class="text-muted mb-1 small text-uppercase fw-bold">AVERAGE SCORE</p>
+                            @if (isLoadingStats)
+                            {
+                                <div class="spinner-border spinner-border-sm text-info" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <h2 class="mb-0 fw-bold text-dark">@averageScore%</h2>
+                            }
+                        </div>
+                        <div class="bg-info bg-opacity-10 rounded p-3">
+                            <i class="bi bi-graph-up-arrow text-info" style="font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi bi-trophy text-warning"></i> Overall performance
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Options -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-white">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0 text-dark">
+                        <i class="bi bi-clock-history text-primary"></i> Additional Options
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <i class="bi bi-bar-chart-fill text-primary me-3" style="font-size: 2rem;"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 text-dark">View Results</h6>
+                                    <small class="text-muted">Check exam results and performance</small>
+                                </div>
+                                <a href="/exam-results-index" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <i class="bi bi-gear-fill text-secondary me-3" style="font-size: 2rem;"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 text-dark">System Settings</h6>
+                                    <small class="text-muted">Configure system preferences</small>
+                                </div>
+                                <a href="#" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
     }
 
-    private void LoadDashboardData()
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+
+    /* Ensure entire card is clickable */
+    a.text-decoration-none {
+        color: inherit;
+        display: block;
+    }
+
+    a.text-decoration-none:hover {
+        text-decoration: none !important;
+    }
+
+    /* Prevent nested elements from blocking clicks */
+    .card-body * {
+        pointer-events: none;
+    }
+
+    .card-body {
+        pointer-events: auto;
+    }
+</style>
+
+@code {
+    private int totalExams = 0;
+    private int publishedExams = 0;
+    private int totalAttempts = 0;
+    private int totalQuestions = 0;
+    private int averageScore = 0;
+    private bool isLoadingStats = true;
+
+    protected override async Task OnInitializedAsync()
     {
-        // TODO: 实际从数据库查询数据
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        try
+        {
+            isLoadingStats = true;
+
+            var exams = await ExamService.GetAllExamsAsync();
+            totalExams = exams.Count;
+            publishedExams = exams.Count(e => e.IsPublished);
+            totalQuestions = exams.Sum(e => e.Questions?.Count ?? 0);
+
+            var allAttempts = new List<Online_Examination.Domain.Attempt>();
+            foreach (var exam in exams)
+            {
+                if (exam.Attempts != null)
+                {
+                    allAttempts.AddRange(exam.Attempts);
+                }
+            }
+
+            totalAttempts = allAttempts.Count;
+
+            if (totalAttempts > 0 && totalQuestions > 0)
+            {
+                var totalPossibleScore = allAttempts.Sum(a => a.Exam?.Questions?.Count ?? 0);
+                var totalActualScore = allAttempts.Sum(a => a.Score);
+                
+                if (totalPossibleScore > 0)
+                {
+                    averageScore = (int)Math.Round((double)totalActualScore / totalPossibleScore * 100);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading dashboard data: {ex.Message}");
+        }
+        finally
+        {
+            isLoadingStats = false;
+        }
     }
 }

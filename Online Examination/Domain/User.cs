@@ -1,34 +1,33 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace Online_Examination.Domain
 {
-    public class User : IdentityUser<int> // 使用 int 作为主键，保持与 BaseDomainModel 一致
+    // ?? 建议保持类名为 Online_ExaminationUser，除非你准备好了去修改 Context 和 Program.cs
+    public class Online_ExaminationUser : IdentityUser
     {
-        // 注意：IdentityUser 已经包含了 Email, UserName 等字段，所以这里可以移除重复的
+        // ==========================================
+        // 1. 导航属性 (用于关联 Exam 和 Attempt)
+        // ==========================================
 
-        // 角色字段
-        [Required]
+        // 用户创建的试卷 (老师/管理员)
+        public virtual ICollection<Exam> CreatedExams { get; set; } = new List<Exam>();
+
+        // 用户的考试记录 (学生)
+        public virtual ICollection<Attempt> Attempts { get; set; } = new List<Attempt>();
+
+        // ==========================================
+        // 2. 审计字段
+        // ==========================================
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime ModifiedDate { get; set; } = DateTime.Now;
+
+        // ==========================================
+        // 3. 冗余角色字段 (兼容性保留)
+        // ==========================================
+        // 注意：Identity 标准做法是使用 AspNetRoles 表。
+        // 但为了兼容你现有的 Login.razor 逻辑 (user.Role == "Student")，我们保留这个字段。
         [MaxLength(20)]
-        public string Role { get; set; } = "Student"; // 默认为 Student
-
-        // --- 忘记密码字段 ---
-        // 注意：IdentityUser 已经有内置的密码重置机制，这些字段可以删除
-        // public string? PasswordResetToken { get; set; }
-        // public DateTime? PasswordResetTokenExpiry { get; set; }
-
-        // --- 审计字段（从 BaseDomainModel 继承） ---
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-        public string? CreatedBy { get; set; }
-        public DateTime ModifiedDate { get; set; } = DateTime.UtcNow;
-        public string? ModifiedBy { get; set; }
-
-        // --- 导航属性 (EF Core 关系映射) ---
-
-        // 1. 如果这个用户是「老师/管理员」，他创建的所有考卷列表
-        public List<Exam> CreatedExams { get; set; } = new List<Exam>();
-
-        // 2. 如果这个用户是「学生」，他参加过的考试成绩记录
-        public List<Attempt> Attempts { get; set; } = new List<Attempt>();
+        public string Role { get; set; } = "Student";
     }
 }

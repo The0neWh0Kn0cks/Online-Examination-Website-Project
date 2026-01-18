@@ -21,21 +21,18 @@ namespace Online_Examination.Services
             _signInManager = signInManager;
         }
 
-        // ==========================================
-        // 1. 用户认证模块
-        // ==========================================
 
         public async Task<Online_ExaminationUser> RegisterStudentAsync(Online_ExaminationUser user, string password)
         {
             if (string.IsNullOrEmpty(user.Email))
             {
-                throw new Exception("邮箱地址不能为空");
+                throw new Exception("Email cannot be empty.");
             }
 
             var existingUser = await _userManager.FindByEmailAsync(user.Email);
             if (existingUser != null)
             {
-                throw new Exception("该邮箱已被注册");
+                throw new Exception("Email had registerd.");
             }
 
             user.UserName = user.Email;
@@ -45,28 +42,31 @@ namespace Online_Examination.Services
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new Exception($"注册失败: {errors}");
+                throw new Exception($"Register to fail: {errors}");
             }
 
             return user;
         }
 
-        public async Task<Online_ExaminationUser?> LoginAsync(string email, string password)
+        public async Task<Microsoft.AspNetCore.Identity.SignInResult> LoginAsync(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                return null;
+                return Microsoft.AspNetCore.Identity.SignInResult.Failed;
             }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
+            return await _signInManager.PasswordSignInAsync(
+                user, 
+                password, 
+                isPersistent: false, 
+                lockoutOnFailure: false
+            );
+        }
 
-            if (result.Succeeded)
-            {
-                return user;
-            }
-
-            return null;
+        public async Task<Online_ExaminationUser?> GetUserByEmailAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
         }
 
         // ==========================================

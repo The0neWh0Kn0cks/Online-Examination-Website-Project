@@ -1,28 +1,238 @@
 ﻿@page "/user-dashboard"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Student")]
+@inject ExamService ExamService
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode InteractiveServer
 
-<HeadContent>
-    <link rel="stylesheet" href="/css/user-dashboard.css" />
-</HeadContent>
+@using Online_Examination.Services
+@using Microsoft.AspNetCore.Components.Authorization
 
-<section class="dashboard">
-    <h1>Welcome, Student</h1>
-    <p>Select an option to continue</p>
+<PageTitle>Student Dashboard | Examination Board</PageTitle>
 
-    <div class="dashboard-container">
-        <div class="dashboard-card">
-            <h2>My Exams</h2>
-            <p>Access your assigned examinations.</p>
-            <NavLink href="/exam-index" class="card-btn">Enter Exam</NavLink>
-        </div>
-
-        <div class="dashboard-card">
-            <h2>Results</h2>
-            <p>View your examination results.</p>
-            <NavLink href="/exam-results-index" class="card-btn">View Results</NavLink>
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold mb-2">
+                <i class="bi bi-mortarboard-fill text-primary"></i> Student Portal
+            </h1>
+            <p class="lead text-muted">Welcome back, @userName!</p>
         </div>
     </div>
-</section>
+
+    <!-- Primary Action: Join Exam -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-lg hover-lift">
+                <div class="card-body p-5 text-center bg-gradient-primary">
+                    <div class="mb-4">
+                        <i class="bi bi-key-fill text-white" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="text-white mb-3">Ready to Take an Exam?</h2>
+                    <p class="text-white opacity-75 mb-4">
+                        Enter your exam access code provided by your instructor to begin
+                    </p>
+                    <a href="/student/join-exam" class="btn btn-light btn-lg px-5 py-3">
+                        <i class="bi bi-play-circle-fill"></i> Join an Exam
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Actions -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success bg-opacity-10 rounded p-3 me-3">
+                            <i class="bi bi-clock-history text-success" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">My Exam History</h4>
+                            <p class="text-muted small mb-0">View your past results and scores</p>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-3">
+                        Track your performance and review your completed examinations
+                    </p>
+                    <a href="/exam-history" class="btn btn-outline-success w-100">
+                        <i class="bi bi-list-ul"></i> View History
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info bg-opacity-10 rounded p-3 me-3">
+                            <i class="bi bi-graph-up text-info" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">My Performance</h4>
+                            <p class="text-muted small mb-0">See your academic progress</p>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-3">
+                        View detailed analytics of your exam performance
+                    </p>
+                    <button class="btn btn-outline-info w-100" disabled>
+                        <i class="bi bi-bar-chart"></i> Coming Soon
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    @if (!isLoadingStats)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-speedometer2 text-primary"></i> Your Statistics
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="p-3">
+                                    <i class="bi bi-clipboard-check text-primary" style="font-size: 2.5rem;"></i>
+                                    <h3 class="mt-2 mb-1">@totalAttemptsCount</h3>
+                                    <p class="text-muted small mb-0">Exams Completed</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="p-3">
+                                    <i class="bi bi-star-fill text-warning" style="font-size: 2.5rem;"></i>
+                                    <h3 class="mt-2 mb-1">@averageScore%</h3>
+                                    <p class="text-muted small mb-0">Average Score</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3">
+                                    <i class="bi bi-trophy-fill text-success" style="font-size: 2.5rem;"></i>
+                                    <h3 class="mt-2 mb-1">@bestScore%</h3>
+                                    <p class="text-muted small mb-0">Best Score</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Instructions -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 bg-light">
+                <div class="card-body p-4">
+                    <h5 class="mb-3">
+                        <i class="bi bi-info-circle-fill text-primary"></i> How to Take an Exam
+                    </h5>
+                    <ol class="mb-0">
+                        <li class="mb-2">Get your <strong>Access Code</strong> from your instructor</li>
+                        <li class="mb-2">Click "<strong>Join an Exam</strong>" and enter the code</li>
+                        <li class="mb-2">Read all questions carefully before answering</li>
+                        <li class="mb-2">Submit your exam before time runs out</li>
+                        <li class="mb-0">View your results immediately after submission</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2) !important;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+</style>
 
 @code {
+    private string userName = "Student";
+    private int totalAttemptsCount = 0;
+    private int averageScore = 0;
+    private int bestScore = 0;
+    private bool isLoadingStats = true;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserData();
+    }
+
+    private async Task LoadUserData()
+    {
+        try
+        {
+            isLoadingStats = true;
+
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                userName = user.Identity.Name ?? "Student";
+                var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var attempts = await ExamService.GetUserAttemptsAsync(userId);
+                    totalAttemptsCount = attempts.Count;
+
+                    if (attempts.Any())
+                    {
+                        var totalScore = 0;
+                        var totalPossible = 0;
+                        var bestPercentage = 0.0;
+
+                        foreach (var attempt in attempts)
+                        {
+                            var examQuestions = attempt.Exam?.Questions?.Count ?? 0;
+                            if (examQuestions > 0)
+                            {
+                                totalScore += attempt.Score;
+                                totalPossible += examQuestions;
+
+                                var percentage = (double)attempt.Score / examQuestions * 100;
+                                if (percentage > bestPercentage)
+                                {
+                                    bestPercentage = percentage;
+                                }
+                            }
+                        }
+
+                        if (totalPossible > 0)
+                        {
+                            averageScore = (int)Math.Round((double)totalScore / totalPossible * 100);
+                        }
+
+                        bestScore = (int)Math.Round(bestPercentage);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading user data: {ex.Message}");
+        }
+        finally
+        {
+            isLoadingStats = false;
+        }
+    }
 }

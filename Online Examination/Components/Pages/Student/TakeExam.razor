@@ -1,0 +1,370 @@
+@page "/student/take-exam/{ExamId:int}"
+@inject ExamService ExamService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode InteractiveServer
+
+@using Online_Examination.Services
+@using Online_Examination.Domain
+@using Microsoft.AspNetCore.Components.Authorization
+
+<PageTitle>Take Exam | @(exam?.Title ?? "Examination Board")</PageTitle>
+
+<div class="container-fluid mt-3">
+    @if (isLoading)
+    {
+        <div class="text-center mt-5">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visibly-hidden">Loading exam...</span>
+            </div>
+            <p class="mt-3 text-muted">Loading exam...</p>
+        </div>
+    }
+    else if (exam == null)
+    {
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3">Exam Not Found</h4>
+                    <p>The exam you're trying to access does not exist or is no longer available.</p>
+                    <a href="/student/join-exam" class="btn btn-primary mt-2">
+                        <i class="bi bi-arrow-left"></i> Back to Join Exam
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Exam Header -->
+        <div class="card shadow-sm mb-4 bg-primary text-white">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="mb-1"><i class="bi bi-file-earmark-text"></i> @exam.Title</h2>
+                        @if (!string.IsNullOrEmpty(exam.Description))
+                        {
+                            <p class="mb-0 opacity-75">@exam.Description</p>
+                        }
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="bg-white text-primary rounded p-3">
+                            <div class="mb-2">
+                                <i class="bi bi-clock"></i> <strong>Time Limit:</strong> @exam.TimeLimitMinutes minutes
+                            </div>
+                            <div>
+                                <i class="bi bi-list-ol"></i> <strong>Questions:</strong> @exam.Questions.Count
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exam Form -->
+        <EditForm Model="@this" OnValidSubmit="@HandleSubmitExam">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @errorMessage
+                            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                        </div>
+                    }
+
+                    <!-- Questions List -->
+                    @for (int i = 0; i < exam.Questions.Count; i++)
+                    {
+                        var question = exam.Questions[i];
+                        var questionNumber = i + 1;
+
+                        <div class="card mb-4 shadow-sm @(GetQuestionCardClass(question.Id))">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <span class="badge bg-primary me-2">Q@questionNumber</span>
+                                    Question @questionNumber of @exam.Questions.Count
+                                </h5>
+                                @if (StudentAnswers.ContainsKey(question.Id))
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Answered
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-question-circle"></i> Not Answered
+                                    </span>
+                                }
+                            </div>
+                            <div class="card-body">
+                                <!-- Question Text -->
+                                <div class="mb-4">
+                                    <p class="lead fw-bold mb-3">@question.Text</p>
+
+                                    <!-- Reading Passage (if exists) -->
+                                    @if (!string.IsNullOrEmpty(question.ReadingPassage))
+                                    {
+                                        <div class="alert alert-light border">
+                                            <h6 class="fw-bold"><i class="bi bi-book"></i> Reading Passage:</h6>
+                                            <p class="mb-0" style="white-space: pre-line;">@question.ReadingPassage</p>
+                                        </div>
+                                    }
+
+                                    <!-- Image (if exists) -->
+                                    @if (!string.IsNullOrEmpty(question.ImageUrl))
+                                    {
+                                        <div class="text-center mb-3">
+                                            <img src="@question.ImageUrl" 
+                                                 alt="Question Image" 
+                                                 class="img-fluid rounded border"
+                                                 style="max-height: 400px;" />
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Options -->
+                                <div class="options-container">
+                                    <div class="form-check mb-3 p-3 border rounded @(GetOptionClass(question.Id, "A"))">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="question_@question.Id" 
+                                               id="q@(question.Id)_optionA"
+                                               value="A"
+                                               checked="@(StudentAnswers.ContainsKey(question.Id) && StudentAnswers[question.Id] == "A")"
+                                               @onchange="@(() => UpdateAnswer(question.Id, "A"))" />
+                                        <label class="form-check-label w-100 cursor-pointer" for="q@(question.Id)_optionA">
+                                            <strong>A.</strong> @question.OptionA
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-3 p-3 border rounded @(GetOptionClass(question.Id, "B"))">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="question_@question.Id" 
+                                               id="q@(question.Id)_optionB"
+                                               value="B"
+                                               checked="@(StudentAnswers.ContainsKey(question.Id) && StudentAnswers[question.Id] == "B")"
+                                               @onchange="@(() => UpdateAnswer(question.Id, "B"))" />
+                                        <label class="form-check-label w-100 cursor-pointer" for="q@(question.Id)_optionB">
+                                            <strong>B.</strong> @question.OptionB
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-3 p-3 border rounded @(GetOptionClass(question.Id, "C"))">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="question_@question.Id" 
+                                               id="q@(question.Id)_optionC"
+                                               value="C"
+                                               checked="@(StudentAnswers.ContainsKey(question.Id) && StudentAnswers[question.Id] == "C")"
+                                               @onchange="@(() => UpdateAnswer(question.Id, "C"))" />
+                                        <label class="form-check-label w-100 cursor-pointer" for="q@(question.Id)_optionC">
+                                            <strong>C.</strong> @question.OptionC
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-3 p-3 border rounded @(GetOptionClass(question.Id, "D"))">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="question_@question.Id" 
+                                               id="q@(question.Id)_optionD"
+                                               value="D"
+                                               checked="@(StudentAnswers.ContainsKey(question.Id) && StudentAnswers[question.Id] == "D")"
+                                               @onchange="@(() => UpdateAnswer(question.Id, "D"))" />
+                                        <label class="form-check-label w-100 cursor-pointer" for="q@(question.Id)_optionD">
+                                            <strong>D.</strong> @question.OptionD
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Progress Summary -->
+                    <div class="card mb-4 bg-light">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <h4 class="text-primary">@exam.Questions.Count</h4>
+                                    <p class="text-muted mb-0">Total Questions</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h4 class="text-success">@StudentAnswers.Count</h4>
+                                    <p class="text-muted mb-0">Answered</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h4 class="text-warning">@(exam.Questions.Count - StudentAnswers.Count)</h4>
+                                    <p class="text-muted mb-0">Remaining</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="card mb-4 shadow">
+                        <div class="card-body text-center">
+                            <p class="mb-3">
+                                <i class="bi bi-info-circle"></i> 
+                                Please review all your answers before submitting. You cannot change your answers after submission.
+                            </p>
+                            <button type="submit" class="btn btn-success btn-lg px-5" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <span>Submitting...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-send"></i>
+                                    <span>Submit Exam</span>
+                                }
+                            </button>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-shield-check"></i> Your answers are automatically saved
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .form-check:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.2s;
+    }
+
+    .form-check-input:checked ~ .form-check-label {
+        font-weight: 600;
+        color: #0d6efd;
+    }
+
+    .options-container .form-check.border {
+        border-width: 2px !important;
+    }
+
+    .options-container .form-check.border-primary {
+        background-color: #e7f1ff;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public int ExamId { get; set; }
+
+    private Exam? exam;
+    private Dictionary<int, string> StudentAnswers = new Dictionary<int, string>();
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private string errorMessage = string.Empty;
+    private string? currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                currentUserId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            }
+
+            exam = await ExamService.GetExamByIdAsync(ExamId);
+
+            if (exam == null)
+            {
+                errorMessage = "Exam not found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading exam: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void UpdateAnswer(int questionId, string selectedOption)
+    {
+        if (StudentAnswers.ContainsKey(questionId))
+        {
+            StudentAnswers[questionId] = selectedOption;
+        }
+        else
+        {
+            StudentAnswers.Add(questionId, selectedOption);
+        }
+
+        Console.WriteLine($"Question {questionId}: Selected option {selectedOption}");
+    }
+
+    private async Task HandleSubmitExam()
+    {
+        errorMessage = string.Empty;
+
+        if (exam == null)
+        {
+            errorMessage = "Cannot submit - exam data not loaded.";
+            return;
+        }
+
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            errorMessage = "You must be logged in to submit the exam.";
+            return;
+        }
+
+        if (StudentAnswers.Count < exam.Questions.Count)
+        {
+            var unanswered = exam.Questions.Count - StudentAnswers.Count;
+            errorMessage = $"Please answer all questions. You have {unanswered} unanswered question(s).";
+            return;
+        }
+
+        try
+        {
+            isSubmitting = true;
+
+            var attempt = await ExamService.SubmitExamAttemptAsync(exam.Id, currentUserId, StudentAnswers);
+
+            Navigation.NavigateTo($"/student/exam-result/{attempt.Id}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error submitting exam: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private string GetQuestionCardClass(int questionId)
+    {
+        return StudentAnswers.ContainsKey(questionId) ? "border-success" : "";
+    }
+
+    private string GetOptionClass(int questionId, string option)
+    {
+        if (StudentAnswers.ContainsKey(questionId) && StudentAnswers[questionId] == option)
+        {
+            return "border-primary";
+        }
+        return "";
+    }
+}

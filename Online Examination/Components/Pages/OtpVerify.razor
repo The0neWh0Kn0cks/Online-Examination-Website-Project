@@ -4,7 +4,7 @@
 <PageTitle>Verify OTP | Examination Board</PageTitle>
 
 <HeadContent>
-    @* 引用新的独立 css *@
+
     <link rel="stylesheet" href="/css/otpstyle.css" />
 </HeadContent>
 
@@ -17,7 +17,7 @@
             Please enter the code below.
         </p>
 
-        @* 消息提示区域 (UI逻辑保留，但默认不显示) *@
+
         @if (!string.IsNullOrEmpty(message))
         {
             <div class="alert-message @(isError ? "alert-error" : "alert-success")">
@@ -51,24 +51,24 @@
 </div>
 
 @code {
-    // 接收 URL 中的 email 参数
+
     [SupplyParameterFromQuery]
     public string? Email { get; set; }
 
-    // 前端绑定的变量
-    private string? otpCode;
-    private string? message; // 控制提示框内容
-    private bool isError = false; // 控制提示框颜色
-    private bool isProcessing = false; // 控制按钮禁用状态
 
-    // 仅保留空的方法签名，防止页面报错
+    private string? otpCode;
+    private string? message; 
+    private bool isError = false; 
+    private bool isProcessing = false;
+
+    
     private void VerifyOtp()
     {
-        // 暂无逻辑
+
     }
 
     private void ResendCode()
     {
-        // 暂无逻辑
+
     }
 }

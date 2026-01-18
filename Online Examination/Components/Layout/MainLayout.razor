@@ -11,7 +11,7 @@
             @* 只在非 Home 页面显示 Login/Logout 按钮 *@
             @if (!IsHomePage)
             {
-                <NavLink href="/login">Logout</NavLink>
+                <NavLink href="/Account/Login">Logout</NavLink>
             }
         </nav>
     </header>
@@ -35,7 +35,6 @@
             var currentUri = Navigation.Uri;
             var baseUri = Navigation.BaseUri;
             
-            // 检查是否为根路径（Home 页面）
             return currentUri == baseUri || 
                    currentUri == baseUri.TrimEnd('/') ||
                    currentUri.EndsWith("/") && currentUri.Length == baseUri.Length;
