@@ -70,7 +70,8 @@ builder.Services.AddAuthentication(options =>
 })
     .AddIdentityCookies();
 
-builder.Services.AddSingleton<IEmailSender<Online_ExaminationUser>, IdentityNoOpEmailSender>();
+// Email Sender Service - Uses real Gmail SMTP
+builder.Services.AddScoped<IEmailSender<Online_ExaminationUser>, GmailEmailSender>();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
